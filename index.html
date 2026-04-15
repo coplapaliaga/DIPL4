@@ -1,109 +1,224 @@
+Aquí tienes el código completo y actualizado para tu archivo index.html. He ajustado la lógica para que sea más robusta, maneje los espacios en los nombres de tus archivos (como los que vi en tus capturas) y use exactamente tus datos de usuario y repositorio.
+
+Copia todo este código y reemplaza el contenido de tu index.html en GitHub:
+
+HTML
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Panel de Control - Repositorio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - COPLA</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding-top: 50px; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 450px; }
-        h2 { text-align: center; color: #333; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 12px; background: #24292e; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn:hover { background: #444; }
-        #panel { display: none; }
-        .lista { margin-top: 20px; }
-        .item-archivo { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 12px; 
-            background: #fff; 
-            border: 1px solid #eee; 
-            margin-bottom: 8px; 
+        :root {
+            --primary-color: #24292e;
+            --success-color: #28a745;
+            --bg-color: #f6f8fa;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
+            width: 100%;
+            max-width: 450px;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 24px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 20px 0;
+            border: 1px solid #d1d5da;
             border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
         }
-        .btn-abrir { 
-            background: #28a745; 
-            color: white; 
-            text-decoration: none; 
-            padding: 6px 12px; 
-            border-radius: 4px; 
-            font-size: 13px; 
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
         }
-        .error { color: red; text-align: center; font-size: 14px; }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #444;
+        }
+
+        .btn-logout {
+            background-color: #f3f4f6;
+            color: #d73a49;
+            margin-top: 20px;
+        }
+
+        #panel-admin {
+            display: none;
+        }
+
+        .file-list-container {
+            margin-top: 20px;
+            border-top: 1px solid #e1e4e8;
+            padding-top: 20px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #fff;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            transition: transform 0.1s;
+        }
+
+        .file-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .file-name {
+            font-size: 14px;
+            color: #24292e;
+            word-break: break-all;
+            margin-right: 10px;
+        }
+
+        .btn-open {
+            background-color: var(--success-color);
+            color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .error-msg {
+            color: #d73a49;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            color: #586069;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <div id="login">
-        <h2>Acceso al Repositorio</h2>
-        <input type="text" id="u" placeholder="Usuario">
-        <input type="password" id="p" placeholder="Contraseña">
-        <button class="btn" onclick="validar()">Entrar</button>
-        <p id="msg" class="error"></p>
+<div class="container">
+    <div id="login-section">
+        <h2>Panel de admin</h2>
+        <div id="error-login" class="error-msg"></div>
+        <input type="text" id="username" placeholder="Usuario">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button class="btn btn-primary" onclick="handleLogin()">Ingresar</button>
     </div>
 
-    <div id="panel">
-        <h2 id="titulo"></h2>
-        <p><strong>Archivos detectados en /paginas:</strong></p>
-        <div id="lista-archivos" class="lista">
-            Cargando archivos del repositorio...
+    <div id="panel-admin">
+        <h2 id="welcome-text">Archivos</h2>
+        <p style="font-size: 14px; color: #586069;">Archivos detectados en <strong>/paginas</strong>:</p>
+        
+        <div id="file-list" class="file-list-container">
+            <div class="loading">Consultando repositorio...</div>
         </div>
-        <br>
-        <button onclick="location.reload()" style="background:#666" class="btn">Cerrar Sesión</button>
+
+        <button class="btn btn-logout" onclick="location.reload()">Cerrar Sesión</button>
     </div>
 </div>
 
 <script>
-    // --- CONFIGURACIÓN ---
-    const USER_GIT = "TU_USUARIO_GITHUB"; // Cambia esto
-    const REPO_GIT = "NOMBRE_DE_TU_REPO"; // Cambia esto
-    const CARPETA = "paginas"; // Carpeta donde subirás tus HTML manualmente
+    // Configuración de tu repositorio según las imágenes enviadas
+    const CONFIG = {
+        username: "coplapaliaga",
+        repo: "DIPL4",
+        folder: "paginas"
+    };
 
-    function validar() {
-        const user = document.getElementById('u').value;
-        const pass = document.getElementById('p').value;
+    function handleLogin() {
+        const u = document.getElementById('username').value;
+        const p = document.getElementById('password').value;
 
-        if(user === "admin" && pass === "admin") {
-            document.getElementById('login').style.display = 'none';
-            document.getElementById('panel').style.display = 'block';
-            document.getElementById('titulo').innerText = "Panel de " + user;
-            listarArchivos();
+        if (u === "admin" && p === "admin") {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('panel-admin').style.display = 'block';
+            document.getElementById('welcome-text').innerText = "Panel de " + u;
+            fetchFiles();
         } else {
-            document.getElementById('msg').innerText = "Usuario o clave incorrecta";
+            document.getElementById('error-login').innerText = "Usuario o clave incorrectos";
         }
     }
 
-    async function listarArchivos() {
-        const contenedor = document.getElementById('lista-archivos');
-        const urlApi = `https://api.github.com/repos/${USER_GIT}/${REPO_GIT}/contents/${CARPETA}`;
+    async function fetchFiles() {
+        const listElement = document.getElementById('file-list');
+        const apiUrl = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/contents/${CONFIG.folder}`;
 
         try {
-            const respuesta = await fetch(urlApi);
-            const datos = await respuesta.json();
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) {
+                throw new Error("No se pudo conectar con la carpeta");
+            }
 
-            if (Array.isArray(datos)) {
-                contenedor.innerHTML = "";
-                datos.forEach(archivo => {
-                    // Solo mostramos archivos .html
-                    if (archivo.name.endsWith('.html')) {
-                        const div = document.createElement('div');
-                        div.className = 'item-archivo';
-                        div.innerHTML = `
-                            <span>${archivo.name}</span>
-                            <a href="${archivo.name}" class="btn-abrir" target="_blank">Acceder</a>
+            const files = await response.json();
+            listElement.innerHTML = ""; // Limpiar mensaje de carga
+
+            if (Array.isArray(files) && files.length > 0) {
+                files.forEach(file => {
+                    // Solo listamos archivos (ignoramos carpetas si las hay)
+                    if (file.type === "file") {
+                        const item = document.createElement('div');
+                        item.className = 'file-item';
+                        
+                        // URL de GitHub Pages: https://usuario.github.io/repo/carpeta/archivo
+                        const fileUrl = `https://${CONFIG.username}.github.io/${CONFIG.repo}/${CONFIG.folder}/${encodeURIComponent(file.name)}`;
+
+                        item.innerHTML = `
+                            <span class="file-name">${file.name}</span>
+                            <a href="${fileUrl}" class="btn-open" target="_blank">Abrir</a>
                         `;
-                        // La URL de acceso en GitHub Pages suele ser: carpeta/archivo.html
-                        div.querySelector('a').href = `./${CARPETA}/${archivo.name}`;
-                        contenedor.appendChild(div);
+                        listElement.appendChild(item);
                     }
                 });
             } else {
-                contenedor.innerHTML = "No se encontraron archivos en la carpeta /paginas";
+                listElement.innerHTML = '<div class="loading">No se encontraron archivos en la carpeta /paginas</div>';
             }
-        } catch (e) {
-            contenedor.innerHTML = "Error al conectar con GitHub API.";
+
+        } catch (error) {
+            console.error(error);
+            listElement.innerHTML = '<div class="error-msg">Error al cargar archivos. Revisa la consola (F12).</div>';
         }
     }
 </script>
